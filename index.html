@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScheduleIQ Operator Dashboard</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121933;
+      --panel-2: #172041;
+      --text: #e8ecf8;
+      --muted: #9aa6c7;
+      --accent: #5ea0ff;
+      --good: #22c55e;
+      --warn: #f59e0b;
+      --bad: #ef4444;
+      --border: rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: linear-gradient(180deg, #09101e 0%, #0d1327 100%);
+      color: var(--text);
+    }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 28px 20px 60px; }
+    .topbar { display:flex; justify-content:space-between; align-items:flex-start; gap:20px; margin-bottom:24px; }
+    h1 { margin:0 0 8px; font-size: 34px; }
+    .sub { color: var(--muted); font-size: 15px; }
+    .updated { color: var(--muted); font-size: 14px; text-align:right; }
+    .grid { display:grid; gap:16px; }
+    .stats { grid-template-columns: repeat(4, minmax(0,1fr)); margin-bottom:16px; }
+    .cols { grid-template-columns: 1.3fr 1fr; }
+    .panel {
+      background: rgba(18,25,51,0.88);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+    }
+    .stat .label, .section-label { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .08em; }
+    .stat .value { font-size: 28px; font-weight: 700; margin-top: 8px; }
+    .stat .hint { color: var(--muted); font-size: 13px; margin-top: 8px; }
+    .panel h2 { margin: 0 0 14px; font-size: 20px; }
+    .pill { display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700; }
+    .good { background: rgba(34,197,94,.15); color: #86efac; }
+    .warn { background: rgba(245,158,11,.15); color: #fcd34d; }
+    .bad { background: rgba(239,68,68,.15); color: #fca5a5; }
+    .muted { color: var(--muted); }
+    .list { display:grid; gap:12px; }
+    .item {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .row { display:flex; justify-content:space-between; gap:14px; align-items:center; }
+    .title { font-weight:700; }
+    .meta { color: var(--muted); font-size: 13px; margin-top: 6px; }
+    .progress { height: 9px; border-radius: 999px; background: rgba(255,255,255,.08); overflow:hidden; margin-top: 10px; }
+    .bar { height: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    table { width:100%; border-collapse: collapse; }
+    th, td { text-align:left; padding: 10px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { color: var(--muted); font-size:12px; text-transform: uppercase; letter-spacing:.08em; }
+    a { color: #93c5fd; text-decoration: none; }
+    .needs { border-left: 4px solid var(--warn); padding-left: 12px; }
+    @media (max-width: 900px) {
+      .stats, .cols { grid-template-columns: 1fr; }
+      .topbar { flex-direction:column; }
+      .updated { text-align:left; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <div class="section-label">Operator Dashboard</div>
+        <h1>ScheduleIQ</h1>
+        <div class="sub">Single-company operating view for product status, workstreams, timeline, revenue, and what R.E.X needs from Gavin.</div>
+      </div>
+      <div class="updated">
+        <div>Last updated</div>
+        <strong>Mar 23, 2026 · 4:10 PM ET</strong>
+      </div>
+    </div>
+
+    <div class="grid stats">
+      <div class="panel stat">
+        <div class="label">Current phase</div>
+        <div class="value">Definition</div>
+        <div class="hint">Turning ScheduleIQ into a concrete build + validation plan.</div>
+      </div>
+      <div class="panel stat">
+        <div class="label">Today’s priority</div>
+        <div class="value">Dashboard + plan</div>
+        <div class="hint">Operator visibility first, then execution tracking.</div>
+      </div>
+      <div class="panel stat">
+        <div class="label">MRR</div>
+        <div class="value">$0</div>
+        <div class="hint">No paying customers yet.</div>
+      </div>
+      <div class="panel stat">
+        <div class="label">Current blocker</div>
+        <div class="value">Execution drift</div>
+        <div class="hint">Fixed with written schedule + dashboard visibility.</div>
+      </div>
+    </div>
+
+    <div class="grid cols">
+      <div class="panel">
+        <h2>Active workstreams</h2>
+        <div class="list">
+          <div class="item">
+            <div class="row"><div class="title">Hosted operator dashboard</div><span class="pill warn">In progress</span></div>
+            <div class="meta">Owner: R.E.X · Next action: connect real updates and keep current daily</div>
+            <div class="progress"><div class="bar" style="width:75%"></div></div>
+          </div>
+          <div class="item">
+            <div class="row"><div class="title">MVP definition</div><span class="pill warn">In progress</span></div>
+            <div class="meta">Goal: lock first version around appointment reminders + confirmations + simple dashboard</div>
+            <div class="progress"><div class="bar" style="width:45%"></div></div>
+          </div>
+          <div class="item">
+            <div class="row"><div class="title">Target customer</div><span class="pill warn">In progress</span></div>
+            <div class="meta">Current hypothesis: small dental practices with recurring no-show pain</div>
+            <div class="progress"><div class="bar" style="width:40%"></div></div>
+          </div>
+          <div class="item">
+            <div class="row"><div class="title">Landing page + pilot capture</div><span class="pill good">Built</span></div>
+            <div class="meta">Basic landing page and pilot capture flow exist in the ScheduleIQ workspace.</div>
+            <div class="progress"><div class="bar" style="width:85%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>What I need from Gavin</h2>
+        <div class="list">
+          <div class="item needs">
+            <div class="title">No immediate blocker</div>
+            <div class="meta">Nothing needed from you to keep moving right now.</div>
+          </div>
+          <div class="item needs">
+            <div class="title">Upcoming decisions</div>
+            <div class="meta">Soon: pricing direction, pilot offer structure, and which dashboard stack should become the long-term version.</div>
+          </div>
+        </div>
+
+        <h2 style="margin-top:20px">Revenue snapshot</h2>
+        <table>
+          <tr><th>Metric</th><th>Value</th></tr>
+          <tr><td>MRR</td><td>$0</td></tr>
+          <tr><td>Total revenue</td><td>$0</td></tr>
+          <tr><td>This month</td><td>$0</td></tr>
+          <tr><td>Paying customers</td><td>0</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid cols" style="margin-top:16px;">
+      <div class="panel">
+        <h2>Timeline / roadmap</h2>
+        <table>
+          <tr><th>Milestone</th><th>Status</th><th>Target</th></tr>
+          <tr><td>Lock MVP scope</td><td><span class="pill warn">In progress</span></td><td>Today</td></tr>
+          <tr><td>Choose target customer + workflow</td><td><span class="pill warn">In progress</span></td><td>Today</td></tr>
+          <tr><td>Publish operator dashboard v1</td><td><span class="pill good">Shipped</span></td><td>Today</td></tr>
+          <tr><td>Begin pilot outreach</td><td><span class="pill">Queued</span></td><td>This week</td></tr>
+          <tr><td>First pilot practice onboarded</td><td><span class="pill">Queued</span></td><td>Next milestone</td></tr>
+        </table>
+      </div>
+
+      <div class="panel">
+        <h2>Analytics</h2>
+        <table>
+          <tr><th>Metric</th><th>Status</th></tr>
+          <tr><td>Landing page visitors</td><td class="muted">Not yet connected</td></tr>
+          <tr><td>Pilot signups</td><td class="muted">Not yet connected</td></tr>
+          <tr><td>Activation rate</td><td class="muted">Not yet connected</td></tr>
+          <tr><td>Conversions to paid</td><td class="muted">Not yet connected</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <h2>Current work log</h2>
+      <table>
+        <tr><th>Time</th><th>Task</th><th>Status</th><th>Proof</th></tr>
+        <tr><td>1:44 PM</td><td>Created daily operating template and check cadence</td><td><span class="pill good">Done</span></td><td>Workspace file</td></tr>
+        <tr><td>1:47 PM</td><td>Wrote ScheduleIQ dashboard specification</td><td><span class="pill good">Done</span></td><td>Workspace file</td></tr>
+        <tr><td>4:10 PM</td><td>Published hosted operator dashboard v1</td><td><span class="pill good">Done</span></td><td>This live page</td></tr>
+      </table>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <h2>Links / assets</h2>
+      <table>
+        <tr><th>Asset</th><th>Link</th></tr>
+        <tr><td>Operator dashboard</td><td><a href="./">Current page</a></td></tr>
+        <tr><td>Pilot landing page codebase</td><td class="muted">Local workspace source</td></tr>
+        <tr><td>Dashboard specification</td><td class="muted">Internal spec captured today</td></tr>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

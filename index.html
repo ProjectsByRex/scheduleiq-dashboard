@@ -36,7 +36,15 @@
     .topbar { display:flex; justify-content:space-between; align-items:flex-start; gap:20px; margin-bottom:24px; }
     h1 { margin:0 0 8px; font-size: 34px; }
     .sub { color: var(--muted); font-size: 15px; }
-    .updated { color: var(--muted); font-size: 14px; text-align:right; }
+    .updated { color: var(--muted); font-size: 14px; text-align:right; display:grid; gap:8px; }
+    .timestamp-card {
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      min-width: 240px;
+    }
+    .timestamp-card strong { color: var(--text); display:block; margin-top:2px; }
     .grid { display:grid; gap:16px; }
     .stats { grid-template-columns: repeat(4, minmax(0,1fr)); margin-bottom:16px; }
     .cols { grid-template-columns: 1.3fr 1fr; }
@@ -194,8 +202,14 @@
         <div class="sub">Private operations headquarters for product status, lead pipeline, revenue tracking, and what R.E.X needs from Gavin.</div>
       </div>
       <div class="updated">
-        <div>Last updated</div>
-        <strong>Mar 23, 2026 · 10:28 PM ET</strong>
+        <div class="timestamp-card">
+          <div>Last checked</div>
+          <strong>Mar 24, 2026 · 10:21 AM ET</strong>
+        </div>
+        <div class="timestamp-card">
+          <div>Last updated</div>
+          <strong>Mar 23, 2026 · 10:27 PM ET</strong>
+        </div>
       </div>
     </div>
 
@@ -218,7 +232,7 @@
       <div class="panel stat">
         <div class="label">Current blocker</div>
         <div class="value">None</div>
-        <div class="hint">Gmail is restored, so outreach can resume.</div>
+        <div class="hint">No active blocker confirmed during this check.</div>
       </div>
     </div>
 
@@ -247,7 +261,7 @@
           </div>
           <div class="item">
             <div class="row"><div class="title">Lead follow-up system</div><span class="pill warn">In progress</span></div>
-            <div class="meta">Outbound email is back online. Next focus is structured lead progression and persistent backend storage.</div>
+            <div class="meta">One inbound lead is tracked and marked contacted. No new follow-up activity detected since the last real update.</div>
             <div class="progress"><div class="bar" style="width:68%"></div></div>
           </div>
           <div class="item">
@@ -269,6 +283,10 @@
           <div class="item needs">
             <div class="title">DNS later for protected ops domain</div>
             <div class="meta">When we move from GitHub Pages to the protected admin deployment, I’ll give you the records for <strong>ops.usescheduleiq.com</strong>.</div>
+          </div>
+          <div class="item needs">
+            <div class="title">Idle indicator</div>
+            <div class="meta">No meaningful execution change detected during this run. Dashboard check refreshed, but execution state remains unchanged since Mar 23, 2026 · 10:27 PM ET.</div>
           </div>
           <div class="item needs">
             <div class="title">Upcoming decisions</div>
@@ -316,9 +334,10 @@
       <h2>Current work log</h2>
       <table>
         <tr><th>Time</th><th>Task</th><th>Status</th><th>Proof</th></tr>
-        <tr><td>Earlier today</td><td>Built local lead dashboard and captured first lead</td><td><span class="pill good">Done</span></td><td>Local workspace</td></tr>
-        <tr><td>Tonight</td><td>Reached out to Bright Smile Dental lead</td><td><span class="pill good">Done</span></td><td>Sent email</td></tr>
-        <tr><td>Tonight</td><td>Updated hosted dashboard naming to Ops HQ Dash and added lead pipeline section</td><td><span class="pill good">Done</span></td><td>This live page</td></tr>
+        <tr><td>Mar 23, 2026 · 11:01 AM ET</td><td>Captured first inbound lead in pilot intake</td><td><span class="pill good">Done</span></td><td><code>scheduleiq/data/pilot-leads.jsonl</code></td></tr>
+        <tr><td>Mar 23, 2026 · 10:22 PM ET</td><td>Built local lead dashboard and first lead view</td><td><span class="pill good">Done</span></td><td><code>scheduleiq/leads.html</code></td></tr>
+        <tr><td>Mar 23, 2026 · 10:27 PM ET</td><td>Updated hosted dashboard naming to Ops HQ Dash and added lead pipeline section</td><td><span class="pill good">Done</span></td><td>Git commit <code>13cc942</code> + <code>scheduleiq-dashboard/index.html</code></td></tr>
+        <tr><td>Mar 24, 2026 · 10:21 AM ET</td><td>Dashboard state check executed</td><td><span class="pill warn">No change</span></td><td>No newer commits or lead data after <code>13cc942</code> and <code>pilot-leads.jsonl</code></td></tr>
       </table>
     </div>
 
@@ -343,9 +362,9 @@
         source: 'scheduleiq-pilot-form',
         createdAt: '2026-03-23T15:01:11.248Z',
         stage: 'contacted',
-        notes: 'Inbound landing-page lead. Initial follow-up email has been sent.',
+        notes: 'Inbound landing-page lead captured in pilot intake. Dashboard still shows contacted from the last confirmed execution state.',
         nextAction: 'Wait for reply, then qualify scheduling workflow pain.',
-        progressLabel: 'Contacted after inbound interest.'
+        progressLabel: 'No new movement since the last confirmed contacted state.'
       }
     ];
 

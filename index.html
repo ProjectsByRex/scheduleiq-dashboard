@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ScheduleIQ Ops HQ Dash</title>
   <style>
+    body.locked { overflow: hidden; }
     :root {
       --bg: #0b1020;
       --panel: #121933;
@@ -121,9 +122,70 @@
     @media (max-width: 720px) {
       .detail-grid, .tracker { grid-template-columns: 1fr; }
     }
+    .gate {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(3, 7, 18, 0.96);
+      backdrop-filter: blur(8px);
+    }
+    .gate.hidden { display: none; }
+    .gate-card {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(18,25,51,0.98);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 20px 50px rgba(0,0,0,.35);
+    }
+    .gate-card h2 { margin: 8px 0 10px; }
+    .gate-card p { color: var(--muted); font-size: 14px; line-height: 1.5; }
+    .gate-card input {
+      width: 100%;
+      margin-top: 16px;
+      padding: 13px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #0d1327;
+      color: var(--text);
+      font-size: 15px;
+    }
+    .gate-card button {
+      width: 100%;
+      margin-top: 12px;
+      padding: 13px 14px;
+      border: none;
+      border-radius: 12px;
+      background: var(--accent);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .gate-error {
+      min-height: 18px;
+      color: #fca5a5;
+      font-size: 13px;
+      margin-top: 10px;
+    }
   </style>
 </head>
-<body>
+<body class="locked">
+  <div class="gate" id="gate">
+    <div class="gate-card">
+      <div class="section-label">Temporary access gate</div>
+      <h2>Ops HQ Dash</h2>
+      <p>This is a temporary client-side password gate for casual access control only. It is not true secure auth.</p>
+      <input id="gate-password" type="password" placeholder="Enter password" autocomplete="current-password" />
+      <button id="gate-submit">Open dashboard</button>
+      <div class="gate-error" id="gate-error"></div>
+    </div>
+  </div>
+
   <div class="wrap">
     <div class="topbar">
       <div>
@@ -373,6 +435,36 @@
         </div>
       `;
     }
+
+    const GATE_PASSWORD = '09132000';
+    const gateEl = document.getElementById('gate');
+    const gatePasswordEl = document.getElementById('gate-password');
+    const gateSubmitEl = document.getElementById('gate-submit');
+    const gateErrorEl = document.getElementById('gate-error');
+
+    function unlockGate() {
+      gateEl.classList.add('hidden');
+      document.body.classList.remove('locked');
+      gateErrorEl.textContent = '';
+    }
+
+    function tryUnlock() {
+      if (gatePasswordEl.value === GATE_PASSWORD) {
+        sessionStorage.setItem('ops-hq-dash-unlocked', '1');
+        unlockGate();
+      } else {
+        gateErrorEl.textContent = 'Incorrect password.';
+      }
+    }
+
+    if (sessionStorage.getItem('ops-hq-dash-unlocked') === '1') {
+      unlockGate();
+    }
+
+    gateSubmitEl.addEventListener('click', tryUnlock);
+    gatePasswordEl.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') tryUnlock();
+    });
 
     leadCountEl.textContent = String(leads.length);
     analyticsLeadCountEl.textContent = String(leads.length);

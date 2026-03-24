@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ScheduleIQ Operator Dashboard</title>
+  <title>ScheduleIQ Ops HQ Dash</title>
   <style>
     :root {
       --bg: #0b1020;
@@ -15,6 +15,13 @@
       --good: #22c55e;
       --warn: #f59e0b;
       --bad: #ef4444;
+      --stage-new: #94a3b8;
+      --stage-contacted: #3b82f6;
+      --stage-replied: #06b6d4;
+      --stage-qualified: #f59e0b;
+      --stage-signed-up: #8b5cf6;
+      --stage-buyer: #22c55e;
+      --stage-lost: #ef4444;
       --border: rgba(255,255,255,0.08);
     }
     * { box-sizing: border-box; }
@@ -24,7 +31,7 @@
       background: linear-gradient(180deg, #09101e 0%, #0d1327 100%);
       color: var(--text);
     }
-    .wrap { max-width: 1200px; margin: 0 auto; padding: 28px 20px 60px; }
+    .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 20px 60px; }
     .topbar { display:flex; justify-content:space-between; align-items:flex-start; gap:20px; margin-bottom:24px; }
     h1 { margin:0 0 8px; font-size: 34px; }
     .sub { color: var(--muted); font-size: 15px; }
@@ -43,6 +50,7 @@
     .stat .value { font-size: 28px; font-weight: 700; margin-top: 8px; }
     .stat .hint { color: var(--muted); font-size: 13px; margin-top: 8px; }
     .panel h2 { margin: 0 0 14px; font-size: 20px; }
+    .panel-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
     .pill { display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700; }
     .good { background: rgba(34,197,94,.15); color: #86efac; }
     .warn { background: rgba(245,158,11,.15); color: #fcd34d; }
@@ -65,10 +73,53 @@
     th { color: var(--muted); font-size:12px; text-transform: uppercase; letter-spacing:.08em; }
     a { color: #93c5fd; text-decoration: none; }
     .needs { border-left: 4px solid var(--warn); padding-left: 12px; }
-    @media (max-width: 900px) {
-      .stats, .cols { grid-template-columns: 1fr; }
+    .lead-shell { display:grid; grid-template-columns: minmax(0, 1.1fr) minmax(300px, .9fr); gap:16px; }
+    .lead-list { display:grid; gap:12px; }
+    .lead-card {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      cursor: pointer;
+      transition: .12s ease;
+    }
+    .lead-card:hover, .lead-card.active {
+      border-color: rgba(94,160,255,.5);
+      box-shadow: 0 0 0 1px rgba(94,160,255,.18) inset;
+    }
+    .lead-card .top { display:flex; justify-content:space-between; gap:12px; align-items:center; }
+    .lead-card .name { font-weight:700; }
+    .stage-pill { color:white; }
+    .stage-new { background: var(--stage-new); }
+    .stage-contacted { background: var(--stage-contacted); }
+    .stage-replied { background: var(--stage-replied); }
+    .stage-qualified { background: var(--stage-qualified); }
+    .stage-signed-up { background: var(--stage-signed-up); }
+    .stage-buyer { background: var(--stage-buyer); }
+    .stage-lost { background: var(--stage-lost); }
+    .lead-progress { height: 10px; border-radius: 999px; background: rgba(255,255,255,.08); overflow:hidden; margin-top: 10px; }
+    .lead-progress > div { height:100%; background: linear-gradient(90deg, #60a5fa, #2563eb); }
+    .detail-box {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      min-height: 100%;
+    }
+    .detail-grid { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; margin-top:14px; }
+    .detail-field { background: rgba(255,255,255,.03); border:1px solid var(--border); border-radius: 12px; padding:12px; }
+    .detail-field .k { color: var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px; }
+    .tracker { display:grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap:8px; margin-top: 14px; }
+    .track-step { border:1px solid var(--border); border-radius: 10px; padding:8px; text-align:center; color: var(--muted); font-size:12px; }
+    .track-step.done, .track-step.active { color: #dbeafe; border-color: rgba(94,160,255,.45); background: rgba(94,160,255,.08); }
+    .small { font-size: 13px; }
+    @media (max-width: 1000px) {
+      .stats, .cols, .lead-shell { grid-template-columns: 1fr; }
       .topbar { flex-direction:column; }
       .updated { text-align:left; }
+    }
+    @media (max-width: 720px) {
+      .detail-grid, .tracker { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -76,36 +127,50 @@
   <div class="wrap">
     <div class="topbar">
       <div>
-        <div class="section-label">Operator Dashboard</div>
-        <h1>ScheduleIQ</h1>
-        <div class="sub">Single-company operating view for product status, workstreams, timeline, revenue, and what R.E.X needs from Gavin.</div>
+        <div class="section-label">Ops HQ Dash</div>
+        <h1>ScheduleIQ Ops HQ Dash</h1>
+        <div class="sub">Private operations headquarters for product status, lead pipeline, revenue tracking, and what R.E.X needs from Gavin.</div>
       </div>
       <div class="updated">
         <div>Last updated</div>
-        <strong>Mar 23, 2026 · 4:10 PM ET</strong>
+        <strong>Mar 23, 2026 · 10:28 PM ET</strong>
       </div>
     </div>
 
     <div class="grid stats">
       <div class="panel stat">
         <div class="label">Current phase</div>
-        <div class="value">Definition</div>
-        <div class="hint">Turning ScheduleIQ into a concrete build + validation plan.</div>
+        <div class="value">Lead ops</div>
+        <div class="hint">Lead capture, follow-up, and operator visibility are now active.</div>
       </div>
       <div class="panel stat">
         <div class="label">Today’s priority</div>
-        <div class="value">Dashboard + plan</div>
-        <div class="hint">Operator visibility first, then execution tracking.</div>
+        <div class="value">Leads + outreach</div>
+        <div class="hint">Convert inbound interest into real conversations fast.</div>
       </div>
       <div class="panel stat">
-        <div class="label">MRR</div>
-        <div class="value">$0</div>
-        <div class="hint">No paying customers yet.</div>
+        <div class="label">Lead count</div>
+        <div class="value" id="lead-count">1</div>
+        <div class="hint">Tracked in Ops HQ Dash</div>
       </div>
       <div class="panel stat">
         <div class="label">Current blocker</div>
-        <div class="value">Execution drift</div>
-        <div class="hint">Fixed with written schedule + dashboard visibility.</div>
+        <div class="value">None</div>
+        <div class="hint">Gmail is restored, so outreach can resume.</div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="panel-head">
+        <div>
+          <h2 style="margin-bottom:4px;">Lead pipeline</h2>
+          <div class="muted small">Click a lead to view its progress across new → contacted → replied → qualified → signed up → buyer.</div>
+        </div>
+        <div class="pill warn">Ops HQ Dash</div>
+      </div>
+      <div class="lead-shell">
+        <div class="lead-list" id="lead-list"></div>
+        <div class="detail-box" id="lead-detail"></div>
       </div>
     </div>
 
@@ -114,24 +179,24 @@
         <h2>Active workstreams</h2>
         <div class="list">
           <div class="item">
-            <div class="row"><div class="title">Hosted operator dashboard</div><span class="pill warn">In progress</span></div>
-            <div class="meta">Owner: R.E.X · Next action: connect real updates and keep current daily</div>
-            <div class="progress"><div class="bar" style="width:75%"></div></div>
+            <div class="row"><div class="title">Ops HQ Dash</div><span class="pill good">Live</span></div>
+            <div class="meta">Hosted dashboard is live on GitHub Pages and now includes lead pipeline visibility.</div>
+            <div class="progress"><div class="bar" style="width:92%"></div></div>
+          </div>
+          <div class="item">
+            <div class="row"><div class="title">Lead follow-up system</div><span class="pill warn">In progress</span></div>
+            <div class="meta">Outbound email is back online. Next focus is structured lead progression and persistent backend storage.</div>
+            <div class="progress"><div class="bar" style="width:68%"></div></div>
           </div>
           <div class="item">
             <div class="row"><div class="title">MVP definition</div><span class="pill warn">In progress</span></div>
-            <div class="meta">Goal: lock first version around appointment reminders + confirmations + simple dashboard</div>
-            <div class="progress"><div class="bar" style="width:45%"></div></div>
-          </div>
-          <div class="item">
-            <div class="row"><div class="title">Target customer</div><span class="pill warn">In progress</span></div>
-            <div class="meta">Current hypothesis: small dental practices with recurring no-show pain</div>
-            <div class="progress"><div class="bar" style="width:40%"></div></div>
+            <div class="meta">Lock first version around reminders, confirmations, and schedule recovery.</div>
+            <div class="progress"><div class="bar" style="width:52%"></div></div>
           </div>
           <div class="item">
             <div class="row"><div class="title">Landing page + pilot capture</div><span class="pill good">Built</span></div>
-            <div class="meta">Basic landing page and pilot capture flow exist in the ScheduleIQ workspace.</div>
-            <div class="progress"><div class="bar" style="width:85%"></div></div>
+            <div class="meta">Lead intake is live and has already produced an inbound lead.</div>
+            <div class="progress"><div class="bar" style="width:88%"></div></div>
           </div>
         </div>
       </div>
@@ -140,12 +205,12 @@
         <h2>What I need from Gavin</h2>
         <div class="list">
           <div class="item needs">
-            <div class="title">No immediate blocker</div>
-            <div class="meta">Nothing needed from you to keep moving right now.</div>
+            <div class="title">DNS later for protected ops domain</div>
+            <div class="meta">When we move from GitHub Pages to the protected admin deployment, I’ll give you the records for <strong>ops.usescheduleiq.com</strong>.</div>
           </div>
           <div class="item needs">
             <div class="title">Upcoming decisions</div>
-            <div class="meta">Soon: pricing direction, pilot offer structure, and which dashboard stack should become the long-term version.</div>
+            <div class="meta">Soon: pricing direction, pilot offer structure, and auth method for the private operator dashboard.</div>
           </div>
         </div>
 
@@ -165,11 +230,11 @@
         <h2>Timeline / roadmap</h2>
         <table>
           <tr><th>Milestone</th><th>Status</th><th>Target</th></tr>
-          <tr><td>Lock MVP scope</td><td><span class="pill warn">In progress</span></td><td>Today</td></tr>
-          <tr><td>Choose target customer + workflow</td><td><span class="pill warn">In progress</span></td><td>Today</td></tr>
-          <tr><td>Publish operator dashboard v1</td><td><span class="pill good">Shipped</span></td><td>Today</td></tr>
-          <tr><td>Begin pilot outreach</td><td><span class="pill">Queued</span></td><td>This week</td></tr>
-          <tr><td>First pilot practice onboarded</td><td><span class="pill">Queued</span></td><td>Next milestone</td></tr>
+          <tr><td>Lead pipeline view added to Ops HQ Dash</td><td><span class="pill good">Shipped</span></td><td>Tonight</td></tr>
+          <tr><td>First inbound lead contacted</td><td><span class="pill good">Done</span></td><td>Tonight</td></tr>
+          <tr><td>Persistent lead status backend</td><td><span class="pill warn">Next</span></td><td>Next build step</td></tr>
+          <tr><td>Protected operator deployment</td><td><span class="pill">Queued</span></td><td>Next milestone</td></tr>
+          <tr><td>First buyer</td><td><span class="pill">Queued</span></td><td>Core business goal</td></tr>
         </table>
       </div>
 
@@ -178,9 +243,9 @@
         <table>
           <tr><th>Metric</th><th>Status</th></tr>
           <tr><td>Landing page visitors</td><td class="muted">Not yet connected</td></tr>
-          <tr><td>Pilot signups</td><td class="muted">Not yet connected</td></tr>
-          <tr><td>Activation rate</td><td class="muted">Not yet connected</td></tr>
-          <tr><td>Conversions to paid</td><td class="muted">Not yet connected</td></tr>
+          <tr><td>Lead count</td><td id="analytics-lead-count">1</td></tr>
+          <tr><td>Contacted leads</td><td id="analytics-contacted">1</td></tr>
+          <tr><td>Conversions to paid</td><td class="muted">0</td></tr>
         </table>
       </div>
     </div>
@@ -189,9 +254,9 @@
       <h2>Current work log</h2>
       <table>
         <tr><th>Time</th><th>Task</th><th>Status</th><th>Proof</th></tr>
-        <tr><td>1:44 PM</td><td>Created daily operating template and check cadence</td><td><span class="pill good">Done</span></td><td>Workspace file</td></tr>
-        <tr><td>1:47 PM</td><td>Wrote ScheduleIQ dashboard specification</td><td><span class="pill good">Done</span></td><td>Workspace file</td></tr>
-        <tr><td>4:10 PM</td><td>Published hosted operator dashboard v1</td><td><span class="pill good">Done</span></td><td>This live page</td></tr>
+        <tr><td>Earlier today</td><td>Built local lead dashboard and captured first lead</td><td><span class="pill good">Done</span></td><td>Local workspace</td></tr>
+        <tr><td>Tonight</td><td>Reached out to Bright Smile Dental lead</td><td><span class="pill good">Done</span></td><td>Sent email</td></tr>
+        <tr><td>Tonight</td><td>Updated hosted dashboard naming to Ops HQ Dash and added lead pipeline section</td><td><span class="pill good">Done</span></td><td>This live page</td></tr>
       </table>
     </div>
 
@@ -199,11 +264,121 @@
       <h2>Links / assets</h2>
       <table>
         <tr><th>Asset</th><th>Link</th></tr>
-        <tr><td>Operator dashboard</td><td><a href="./">Current page</a></td></tr>
-        <tr><td>Pilot landing page codebase</td><td class="muted">Local workspace source</td></tr>
-        <tr><td>Dashboard specification</td><td class="muted">Internal spec captured today</td></tr>
+        <tr><td>Ops HQ Dash</td><td><a href="./">Current page</a></td></tr>
+        <tr><td>Future protected ops domain</td><td class="muted">ops.usescheduleiq.com</td></tr>
+        <tr><td>Lead intake source</td><td class="muted">scheduleiq-pilot-form</td></tr>
       </table>
     </div>
   </div>
+
+  <script>
+    const stages = ['new', 'contacted', 'replied', 'qualified', 'signed-up', 'buyer'];
+    const leads = [
+      {
+        name: 'Bright Smile Dental',
+        email: 'owner@brightsmile.example',
+        phone: '+15551230000',
+        source: 'scheduleiq-pilot-form',
+        createdAt: '2026-03-23T15:01:11.248Z',
+        stage: 'contacted',
+        notes: 'Inbound landing-page lead. Initial follow-up email has been sent.',
+        nextAction: 'Wait for reply, then qualify scheduling workflow pain.',
+        progressLabel: 'Contacted after inbound interest.'
+      }
+    ];
+
+    const leadListEl = document.getElementById('lead-list');
+    const leadDetailEl = document.getElementById('lead-detail');
+    const leadCountEl = document.getElementById('lead-count');
+    const analyticsLeadCountEl = document.getElementById('analytics-lead-count');
+    const analyticsContactedEl = document.getElementById('analytics-contacted');
+
+    let activeLeadIndex = 0;
+
+    function formatDate(iso) {
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return iso;
+      return d.toLocaleString([], { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+
+    function stageLabel(stage) {
+      return stage.replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    function stageClass(stage) {
+      return `stage-${stage}`;
+    }
+
+    function progressPct(stage) {
+      const idx = stages.indexOf(stage);
+      const safe = idx === -1 ? 0 : idx;
+      return Math.round(((safe + 1) / stages.length) * 100);
+    }
+
+    function renderLeadList() {
+      leadListEl.innerHTML = leads.map((lead, index) => `
+        <div class="lead-card ${index === activeLeadIndex ? 'active' : ''}" data-index="${index}">
+          <div class="top">
+            <div>
+              <div class="name">${lead.name}</div>
+              <div class="meta">${lead.email}</div>
+            </div>
+            <span class="pill stage-pill ${stageClass(lead.stage)}">${stageLabel(lead.stage)}</span>
+          </div>
+          <div class="meta">Source: ${lead.source} · Created: ${formatDate(lead.createdAt)}</div>
+          <div class="lead-progress"><div style="width:${progressPct(lead.stage)}%"></div></div>
+          <div class="meta">${lead.progressLabel}</div>
+        </div>
+      `).join('');
+
+      document.querySelectorAll('.lead-card').forEach(card => {
+        card.addEventListener('click', () => {
+          activeLeadIndex = Number(card.dataset.index);
+          renderLeadList();
+          renderLeadDetail();
+        });
+      });
+    }
+
+    function renderLeadDetail() {
+      const lead = leads[activeLeadIndex];
+      const currentIndex = stages.indexOf(lead.stage);
+      leadDetailEl.innerHTML = `
+        <div class="row" style="margin-bottom:8px; align-items:flex-start;">
+          <div>
+            <div class="section-label">Selected lead</div>
+            <h2 style="margin:4px 0 0;">${lead.name}</h2>
+            <div class="meta">${formatDate(lead.createdAt)}</div>
+          </div>
+          <span class="pill stage-pill ${stageClass(lead.stage)}">${stageLabel(lead.stage)}</span>
+        </div>
+
+        <div class="lead-progress" style="margin-top:14px;"><div style="width:${progressPct(lead.stage)}%"></div></div>
+        <div class="meta" style="margin-top:8px;">${progressPct(lead.stage)}% through the pipeline</div>
+
+        <div class="tracker">
+          ${stages.map((stage, index) => `<div class="track-step ${index < currentIndex ? 'done' : ''} ${index === currentIndex ? 'active' : ''}">${stageLabel(stage)}</div>`).join('')}
+        </div>
+
+        <div class="detail-grid">
+          <div class="detail-field"><div class="k">Email</div><div><a href="mailto:${lead.email}">${lead.email}</a></div></div>
+          <div class="detail-field"><div class="k">Phone</div><div>${lead.phone}</div></div>
+          <div class="detail-field"><div class="k">Source</div><div>${lead.source}</div></div>
+          <div class="detail-field"><div class="k">Next action</div><div>${lead.nextAction}</div></div>
+        </div>
+
+        <div class="detail-field" style="margin-top:12px;">
+          <div class="k">Notes</div>
+          <div>${lead.notes}</div>
+        </div>
+      `;
+    }
+
+    leadCountEl.textContent = String(leads.length);
+    analyticsLeadCountEl.textContent = String(leads.length);
+    analyticsContactedEl.textContent = String(leads.filter(l => ['contacted', 'replied', 'qualified', 'signed-up', 'buyer'].includes(l.stage)).length);
+    renderLeadList();
+    renderLeadDetail();
+  </script>
 </body>
 </html>

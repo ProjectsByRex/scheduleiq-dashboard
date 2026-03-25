@@ -204,11 +204,11 @@
       <div class="updated">
         <div class="timestamp-card">
           <div>Last checked</div>
-          <strong>Mar 24, 2026 · 9:00 PM ET</strong>
+          <strong>Mar 24, 2026 · 9:05 PM ET</strong>
         </div>
         <div class="timestamp-card">
           <div>Last updated</div>
-          <strong>Mar 24, 2026 · 8:00 PM ET</strong>
+          <strong>Mar 24, 2026 · 9:00 PM ET</strong>
         </div>
       </div>
     </div>
@@ -230,10 +230,29 @@
         <div class="hint">Tracked in Ops HQ Dash</div>
       </div>
       <div class="panel stat">
-        <div class="label">Current blocker</div>
-        <div class="value">None</div>
-        <div class="hint">No active blocker confirmed during this check.</div>
+        <div class="label">Outreach status</div>
+        <div class="value" id="revenue-scoreboard-status">Behind</div>
+        <div class="hint" id="revenue-scoreboard-status-hint">On Track if Outreach Sent Today is 20 or more. Behind if below 20.</div>
       </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="panel-head">
+        <div>
+          <h2 style="margin-bottom:4px;">Revenue scoreboard</h2>
+          <div class="muted small">Source of truth: <code>TODAY_PRIORITY.md</code>. These values must match the Revenue Scoreboard exactly.</div>
+        </div>
+        <div class="pill warn" id="revenue-scoreboard-pill">Behind</div>
+      </div>
+      <table>
+        <tr><th>Field</th><th>Value</th></tr>
+        <tr><td>Outreach Sent Today</td><td id="scoreboard-outreach">—</td></tr>
+        <tr><td>Conversations Started</td><td id="scoreboard-conversations">—</td></tr>
+        <tr><td>Replies Received</td><td id="scoreboard-replies">—</td></tr>
+        <tr><td>Active Leads</td><td id="scoreboard-active-leads">—</td></tr>
+        <tr><td>Estimated MRR</td><td id="scoreboard-estimated-mrr">—</td></tr>
+        <tr><td>Status</td><td id="scoreboard-status-text">Behind</td></tr>
+      </table>
     </div>
 
     <div class="panel" style="margin-bottom:16px;">
@@ -286,7 +305,7 @@
           </div>
           <div class="item needs">
             <div class="title">Idle indicator</div>
-            <div class="meta">Execution changed. Dashboard refreshed to reflect the latest confirmed work as of Mar 24, 2026 · 8:00 PM ET.</div>
+            <div class="meta">Execution changed. Dashboard refreshed to reflect the latest confirmed work as of Mar 24, 2026 · 9:00 PM ET.</div>
           </div>
           <div class="item needs">
             <div class="title">Operator dependency</div>
@@ -348,6 +367,23 @@
     const leadCountEl = document.getElementById('lead-count');
     const analyticsLeadCountEl = document.getElementById('analytics-lead-count');
     const analyticsContactedEl = document.getElementById('analytics-contacted');
+    const revenueScoreboardStatusEl = document.getElementById('revenue-scoreboard-status');
+    const revenueScoreboardStatusHintEl = document.getElementById('revenue-scoreboard-status-hint');
+    const revenueScoreboardPillEl = document.getElementById('revenue-scoreboard-pill');
+    const scoreboardOutreachEl = document.getElementById('scoreboard-outreach');
+    const scoreboardConversationsEl = document.getElementById('scoreboard-conversations');
+    const scoreboardRepliesEl = document.getElementById('scoreboard-replies');
+    const scoreboardActiveLeadsEl = document.getElementById('scoreboard-active-leads');
+    const scoreboardEstimatedMrrEl = document.getElementById('scoreboard-estimated-mrr');
+    const scoreboardStatusTextEl = document.getElementById('scoreboard-status-text');
+
+    const revenueScoreboard = {
+      "outreachSentToday": "- Conversations Started:",
+      "conversationsStarted": "- Replies Received:",
+      "repliesReceived": "- Active Leads:",
+      "activeLeads": "- Estimated MRR:",
+      "estimatedMrr": "Rules:"
+};
 
     let activeLeadIndex = 0;
 
@@ -370,6 +406,41 @@
       const safe = idx === -1 ? 0 : idx;
       return Math.round(((safe + 1) / stages.length) * 100);
     }
+
+    function parseOutreachCount(value) {
+      const match = String(value ?? '').match(/\d+/);
+      return match ? Number(match[0]) : 0;
+    }
+
+    function getRevenueStatus() {
+      return parseOutreachCount(revenueScoreboard.outreachSentToday) >= 20 ? 'On Track' : 'Behind';
+    }
+
+    function applyRevenueStatusClass(el, status) {
+      if (!el) return;
+      el.classList.remove('good', 'warn', 'bad');
+      el.classList.add(status === 'On Track' ? 'good' : 'warn');
+    }
+
+    function renderRevenueScoreboard() {
+      const status = getRevenueStatus();
+      const hint = status === 'On Track'
+        ? 'On Track because Outreach Sent Today is 20 or more.'
+        : 'Behind because Outreach Sent Today is below 20.';
+
+      scoreboardOutreachEl.textContent = revenueScoreboard.outreachSentToday || '—';
+      scoreboardConversationsEl.textContent = revenueScoreboard.conversationsStarted || '—';
+      scoreboardRepliesEl.textContent = revenueScoreboard.repliesReceived || '—';
+      scoreboardActiveLeadsEl.textContent = revenueScoreboard.activeLeads || '—';
+      scoreboardEstimatedMrrEl.textContent = revenueScoreboard.estimatedMrr || '—';
+      scoreboardStatusTextEl.textContent = status;
+      revenueScoreboardStatusEl.textContent = status;
+      revenueScoreboardStatusHintEl.textContent = hint;
+      revenueScoreboardPillEl.textContent = status;
+      applyRevenueStatusClass(revenueScoreboardPillEl, status);
+    }
+
+    renderRevenueScoreboard();
 
     function renderLeadList() {
       leadListEl.innerHTML = leads.map((lead, index) => `

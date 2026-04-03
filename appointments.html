@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScheduleIQ Appointment Status Board</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --blue: #2563eb;
+      --green: #16a34a;
+      --amber: #d97706;
+      --red: #dc2626;
+      --slate: #475569;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 24px;
+    }
+    .wrap { max-width: 1180px; margin: 0 auto; }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    h1 { font-size: 30px; font-weight: 800; }
+    .sub { color: var(--muted); margin-top: 6px; max-width: 760px; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn, button {
+      appearance: none;
+      border: none;
+      background: var(--blue);
+      color: white;
+      font: inherit;
+      font-weight: 700;
+      padding: 12px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn.secondary, button.secondary {
+      background: white;
+      color: var(--text);
+      border: 1px solid #cbd5e1;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+    .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .value { font-size: 28px; font-weight: 800; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .panel-head {
+      padding: 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .panel-title { font-size: 18px; font-weight: 800; }
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 14px;
+      font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+      resize: vertical;
+    }
+    .upload-row {
+      display: grid;
+      grid-template-columns: 1.2fr auto;
+      gap: 12px;
+      padding: 18px;
+      align-items: start;
+    }
+    .status-note {
+      padding: 0 18px 18px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .table-wrap { overflow: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1060px;
+    }
+    th, td {
+      text-align: left;
+      padding: 14px 18px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: top;
+      font-size: 14px;
+    }
+    th {
+      background: #f8fafc;
+      color: var(--slate);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    .pill {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .status-awaiting-response { background: #eff6ff; color: #1d4ed8; }
+    .status-confirmed { background: #ecfdf5; color: #15803d; }
+    .status-reschedule-requested { background: #fff7ed; color: #c2410c; }
+    .status-follow-up-needed { background: #fef3c7; color: #b45309; }
+    .status-no-show-risk { background: #fef2f2; color: #b91c1c; }
+    select {
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font: inherit;
+      min-width: 180px;
+      background: white;
+    }
+    input[type="text"] {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font: inherit;
+      min-width: 180px;
+    }
+    .row-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .empty {
+      padding: 24px 18px;
+      color: var(--muted);
+    }
+    .helper-list {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      padding-left: 18px;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      background: #f8fafc;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+    @media (max-width: 960px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .upload-row { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      body { padding: 16px; }
+      .grid { grid-template-columns: 1fr; }
+      h1 { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>ScheduleIQ Appointment Status Board</h1>
+        <p class="sub">This is the MVP internal view for uploadable appointments, reminder state, and confirmation tracking. Practices can use the CSV template, then staff can quickly see who is confirmed, who asked to reschedule, and who still needs attention.</p>
+      </div>
+      <div class="actions">
+        <a class="btn secondary" href="/appointment-template.csv" download>Download CSV Template</a>
+        <button id="refresh-btn" class="secondary">Refresh</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="label">Upcoming Appointments</div>
+        <div class="value" id="total-count">0</div>
+        <div class="muted">Appointments loaded into the board</div>
+      </div>
+      <div class="card">
+        <div class="label">Confirmed</div>
+        <div class="value" id="confirmed-count">0</div>
+        <div class="muted">Patients already confirmed by text</div>
+      </div>
+      <div class="card">
+        <div class="label">Need Follow-Up</div>
+        <div class="value" id="followup-count">0</div>
+        <div class="muted">Unconfirmed or at-risk appointments</div>
+      </div>
+      <div class="card">
+        <div class="label">Reschedule Requests</div>
+        <div class="value" id="reschedule-count">0</div>
+        <div class="muted">Patients asking to move their visit</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">1) Upload Appointment List</div>
+          <div class="muted">Paste CSV from the template to load the appointment queue into ScheduleIQ.</div>
+        </div>
+      </div>
+      <div class="upload-row">
+        <textarea id="csv-input" placeholder="patient_name,phone,appointment_date,appointment_time&#10;Jane Smith,+15551234567,2026-03-26,09:00 AM"></textarea>
+        <div class="row-actions" style="align-self:start;">
+          <button id="load-sample-btn" class="secondary">Load Sample</button>
+          <button id="upload-btn">Upload Appointments</button>
+        </div>
+      </div>
+      <div class="status-note" id="upload-status">No upload yet.</div>
+      <ul class="helper-list">
+        <li>Required columns: <code>patient_name</code>, <code>phone</code>, <code>appointment_date</code>, <code>appointment_time</code></li>
+        <li>After upload, staff can update confirmation state row by row.</li>
+        <li>Statuses are saved to <code>scheduleiq/data/appointments.json</code>.</li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">2) Confirmation Status Queue</div>
+          <div class="muted">Simple operator-facing view of reminder status, patient response, and next staff action.</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Patient</th>
+              <th>Appointment</th>
+              <th>48h Reminder</th>
+              <th>2h Reminder</th>
+              <th>Confirmation</th>
+              <th>Patient Response</th>
+              <th>Staff Action</th>
+              <th>Update</th>
+            </tr>
+          </thead>
+          <tbody id="appointments-body"></tbody>
+        </table>
+        <div id="empty-state" class="empty" style="display:none;">No appointments loaded yet. Upload a CSV to populate the board.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STATUS_OPTIONS = [
+      'awaiting-response',
+      'confirmed',
+      'reschedule-requested',
+      'follow-up-needed',
+      'no-show-risk'
+    ];
+
+    const totalCountEl = document.getElementById('total-count');
+    const confirmedCountEl = document.getElementById('confirmed-count');
+    const followupCountEl = document.getElementById('followup-count');
+    const rescheduleCountEl = document.getElementById('reschedule-count');
+    const appointmentsBody = document.getElementById('appointments-body');
+    const emptyStateEl = document.getElementById('empty-state');
+    const csvInputEl = document.getElementById('csv-input');
+    const uploadBtn = document.getElementById('upload-btn');
+    const loadSampleBtn = document.getElementById('load-sample-btn');
+    const refreshBtn = document.getElementById('refresh-btn');
+    const uploadStatusEl = document.getElementById('upload-status');
+
+    let appointments = [];
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function formatStatus(status) {
+      return String(status || '')
+        .split('-')
+        .filter(Boolean)
+        .map(chunk => chunk.charAt(0).toUpperCase() + chunk.slice(1))
+        .join(' ');
+    }
+
+    function formatAppointment(item) {
+      const parts = [item.appointment_date, item.appointment_time].filter(Boolean);
+      return parts.length ? parts.join(' · ') : '—';
+    }
+
+    function renderStats(items) {
+      totalCountEl.textContent = items.length;
+      confirmedCountEl.textContent = items.filter(item => item.confirmation_status === 'confirmed').length;
+      followupCountEl.textContent = items.filter(item => ['awaiting-response', 'follow-up-needed', 'no-show-risk'].includes(item.confirmation_status)).length;
+      rescheduleCountEl.textContent = items.filter(item => item.confirmation_status === 'reschedule-requested').length;
+    }
+
+    function renderTable(items) {
+      renderStats(items);
+
+      if (!items.length) {
+        appointmentsBody.innerHTML = '';
+        emptyStateEl.style.display = 'block';
+        return;
+      }
+
+      emptyStateEl.style.display = 'none';
+      appointmentsBody.innerHTML = items.map(item => `
+        <tr>
+          <td>
+            <strong>${escapeHtml(item.patient_name || '—')}</strong><br>
+            <span class="muted">${escapeHtml(item.phone || '—')}</span>
+          </td>
+          <td>${escapeHtml(formatAppointment(item))}</td>
+          <td><span class="pill ${item.reminder_48h_status === 'sent' ? 'status-confirmed' : 'status-awaiting-response'}">${escapeHtml(formatStatus(item.reminder_48h_status || 'queued'))}</span></td>
+          <td><span class="pill ${item.reminder_2h_status === 'sent' ? 'status-confirmed' : 'status-awaiting-response'}">${escapeHtml(formatStatus(item.reminder_2h_status || 'queued'))}</span></td>
+          <td><span class="pill status-${escapeHtml(item.confirmation_status || 'awaiting-response')}">${escapeHtml(formatStatus(item.confirmation_status || 'awaiting-response'))}</span></td>
+          <td><input type="text" data-field="patient_response" data-id="${escapeHtml(item.id)}" value="${escapeHtml(item.patient_response || '')}" placeholder="Confirmed / needs reschedule"></td>
+          <td><input type="text" data-field="staff_action" data-id="${escapeHtml(item.id)}" value="${escapeHtml(item.staff_action || '')}" placeholder="Call back / move slot"></td>
+          <td>
+            <div class="row-actions">
+              <select data-field="confirmation_status" data-id="${escapeHtml(item.id)}">
+                ${STATUS_OPTIONS.map(status => `<option value="${escapeHtml(status)}" ${item.confirmation_status === status ? 'selected' : ''}>${escapeHtml(formatStatus(status))}</option>`).join('')}
+              </select>
+              <button data-action="save" data-id="${escapeHtml(item.id)}" class="secondary">Save</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadSample() {
+      try {
+        const response = await fetch('/appointment-template.csv');
+        const text = await response.text();
+        csvInputEl.value = text.trim();
+        uploadStatusEl.textContent = 'Sample CSV loaded into the editor.';
+        uploadStatusEl.style.color = '#64748b';
+      } catch (error) {
+        uploadStatusEl.textContent = 'Failed to load the sample CSV.';
+        uploadStatusEl.style.color = '#dc2626';
+      }
+    }
+
+    async function fetchAppointments() {
+      refreshBtn.disabled = true;
+      refreshBtn.textContent = 'Refreshing...';
+      try {
+        const response = await fetch('/api/appointments');
+        appointments = await response.json();
+        if (!Array.isArray(appointments)) appointments = [];
+        renderTable(appointments);
+      } catch (error) {
+        appointments = [];
+        renderTable([]);
+        uploadStatusEl.textContent = 'Failed to load appointments from the API.';
+        uploadStatusEl.style.color = '#dc2626';
+      } finally {
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = 'Refresh';
+      }
+    }
+
+    async function uploadAppointments() {
+      const csv = csvInputEl.value.trim();
+      if (!csv) {
+        uploadStatusEl.textContent = 'Paste the appointment CSV first.';
+        uploadStatusEl.style.color = '#dc2626';
+        return;
+      }
+
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = 'Uploading...';
+      try {
+        const response = await fetch('/api/appointments/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ csv })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.ok) {
+          throw new Error(result.error || 'Upload failed');
+        }
+
+        uploadStatusEl.textContent = `Loaded ${result.count} appointments into the board.`;
+        uploadStatusEl.style.color = '#15803d';
+        await fetchAppointments();
+      } catch (error) {
+        uploadStatusEl.textContent = error.message || 'Upload failed.';
+        uploadStatusEl.style.color = '#dc2626';
+      } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = 'Upload Appointments';
+      }
+    }
+
+    async function saveRow(id) {
+      const statusEl = document.querySelector(`select[data-id="${CSS.escape(id)}"][data-field="confirmation_status"]`);
+      const responseEl = document.querySelector(`input[data-id="${CSS.escape(id)}"][data-field="patient_response"]`);
+      const actionEl = document.querySelector(`input[data-id="${CSS.escape(id)}"][data-field="staff_action"]`);
+      const rowItem = appointments.find(item => item.id === id);
+
+      if (!statusEl || !rowItem) return;
+
+      try {
+        const response = await fetch(`/api/appointments/${encodeURIComponent(id)}/status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            confirmation_status: statusEl.value,
+            patient_response: responseEl ? responseEl.value : '',
+            staff_action: actionEl ? actionEl.value : '',
+            reminder_48h_status: rowItem.reminder_48h_status,
+            reminder_2h_status: rowItem.reminder_2h_status
+          })
+        });
+        const result = await response.json();
+        if (!response.ok || !result.ok) {
+          throw new Error(result.error || 'Save failed');
+        }
+
+        uploadStatusEl.textContent = `Updated ${result.appointment.patient_name} to ${formatStatus(result.appointment.confirmation_status)}.`;
+        uploadStatusEl.style.color = '#15803d';
+        await fetchAppointments();
+      } catch (error) {
+        uploadStatusEl.textContent = error.message || 'Failed to save appointment.';
+        uploadStatusEl.style.color = '#dc2626';
+      }
+    }
+
+    appointmentsBody.addEventListener('click', event => {
+      const button = event.target.closest('button[data-action="save"]');
+      if (!button) return;
+      saveRow(button.dataset.id);
+    });
+
+    loadSampleBtn.addEventListener('click', loadSample);
+    uploadBtn.addEventListener('click', uploadAppointments);
+    refreshBtn.addEventListener('click', fetchAppointments);
+
+    fetchAppointments();
+  </script>
+</body>
+</html>

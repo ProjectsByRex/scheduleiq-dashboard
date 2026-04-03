@@ -1,0 +1,44 @@
+[
+  {
+    "id": "jane-smith-2026-03-24-0900am",
+    "patient_name": "Jane Smith",
+    "phone": "+15551234567",
+    "appointment_date": "2026-03-24",
+    "appointment_time": "09:00 AM",
+    "scheduled_for": "2026-03-24T13:00:00.000Z",
+    "reminder_48h_status": "sent",
+    "reminder_2h_status": "queued",
+    "confirmation_status": "confirmed",
+    "patient_response": "Yes, confirmed",
+    "staff_action": "No action needed",
+    "last_updated_at": "2026-03-25T15:02:27.079Z"
+  },
+  {
+    "id": "michael-johnson-2026-03-24-1130am",
+    "patient_name": "Michael Johnson",
+    "phone": "+15557654321",
+    "appointment_date": "2026-03-24",
+    "appointment_time": "11:30 AM",
+    "scheduled_for": "2026-03-24T15:30:00.000Z",
+    "reminder_48h_status": "queued",
+    "reminder_2h_status": "queued",
+    "confirmation_status": "awaiting-response",
+    "patient_response": "",
+    "staff_action": "watch",
+    "last_updated_at": "2026-03-25T15:02:27.075Z"
+  },
+  {
+    "id": "emily-davis-2026-03-25-0200pm",
+    "patient_name": "Emily Davis",
+    "phone": "+15559876543",
+    "appointment_date": "2026-03-25",
+    "appointment_time": "02:00 PM",
+    "scheduled_for": "2026-03-25T18:00:00.000Z",
+    "reminder_48h_status": "queued",
+    "reminder_2h_status": "queued",
+    "confirmation_status": "awaiting-response",
+    "patient_response": "",
+    "staff_action": "watch",
+    "last_updated_at": "2026-03-25T15:02:27.075Z"
+  }
+]

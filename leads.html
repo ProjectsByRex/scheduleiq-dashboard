@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScheduleIQ Ops HQ Dash</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --blue: #2563eb;
+      --blue-soft: #eff6ff;
+      --green: #16a34a;
+      --yellow: #ca8a04;
+      --red: #dc2626;
+      --gray: #94a3b8;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 24px;
+    }
+    .wrap {
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    h1 {
+      font-size: 30px;
+      font-weight: 800;
+    }
+    .sub {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 14px;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    button, .btn, select {
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    button, .btn {
+      background: var(--blue);
+      color: white;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    button.secondary, .btn.secondary {
+      background: white;
+      color: var(--text);
+      border: 1px solid #cbd5e1;
+    }
+    input[type="search"], textarea, input[type="text"], input[type="date"], select {
+      border: 1px solid #cbd5e1;
+      outline: none;
+      background: white;
+      color: var(--text);
+    }
+    input[type="search"] {
+      width: 280px;
+      max-width: 100%;
+      padding: 11px 13px;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+    .click-card {
+      cursor: pointer;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    }
+    .click-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+      border-color: #cbd5e1;
+    }
+    .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    .value {
+      font-size: 28px;
+      font-weight: 800;
+    }
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(320px, .9fr);
+      gap: 20px;
+      align-items: start;
+    }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .panel-head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .panel-title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .table-wrap {
+      overflow: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+    }
+    th, td {
+      text-align: left;
+      padding: 14px 18px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: top;
+      font-size: 14px;
+    }
+    th {
+      color: #475569;
+      background: #f8fafc;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+    tr:hover td { background: #fcfdff; }
+    tr.selected td { background: #eff6ff; }
+    .empty {
+      padding: 28px 18px;
+      color: var(--muted);
+    }
+    .pill {
+      display: inline-block;
+      background: var(--blue-soft);
+      color: #1d4ed8;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .stage-pill { color: white; }
+    .stage-new { background: var(--gray); }
+    .stage-contacted { background: var(--blue); }
+    .stage-replied { background: #0ea5e9; }
+    .stage-qualified { background: var(--yellow); }
+    .stage-signed-up { background: #7c3aed; }
+    .stage-buyer { background: var(--green); }
+    .stage-lost { background: var(--red); }
+    .detail {
+      padding: 18px;
+    }
+    .detail h2 {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+    .detail-section {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid #f1f5f9;
+    }
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .field {
+      background: #f8fafc;
+      border: 1px solid #eef2f7;
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .field-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .field-value {
+      font-size: 14px;
+      word-break: break-word;
+    }
+    .progress-wrap {
+      margin-top: 12px;
+    }
+    .progress-bar {
+      height: 10px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      overflow: hidden;
+      margin: 10px 0 12px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #60a5fa, #2563eb);
+      width: 0%;
+      transition: width .2s ease;
+    }
+    .stage-row {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .mini-stage {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px;
+      font-size: 12px;
+      text-align: center;
+      color: var(--muted);
+      background: white;
+    }
+    .mini-stage.active {
+      border-color: #93c5fd;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-weight: 700;
+    }
+    .mini-stage.done {
+      border-color: #bfdbfe;
+      background: #f8fbff;
+      color: #2563eb;
+    }
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      padding: 12px;
+      border-radius: 12px;
+      resize: vertical;
+      font: inherit;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .detail-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      color: #334155;
+      background: #f8fafc;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stage-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (max-width: 600px) {
+      body { padding: 16px; }
+      h1 { font-size: 24px; }
+      .grid, .detail-grid, .form-row, .stage-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h1>ScheduleIQ Ops HQ Dash</h1>
+        <p class="sub">Private ops headquarters for leads, pipeline stage, and contact progress.</p>
+      </div>
+      <div class="actions">
+        <input id="search" type="search" placeholder="Search practice, email, phone">
+        <button id="refresh">Refresh</button>
+        <a class="btn secondary" href="/api/pilot/leads" target="_blank" rel="noreferrer">Raw JSON</a>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="label">Total Leads</div>
+        <div class="value" id="total-leads">0</div>
+        <div class="muted">All captured leads</div>
+      </div>
+      <div class="card">
+        <div class="label">Today</div>
+        <div class="value" id="today-leads">0</div>
+        <div class="muted">New leads today</div>
+      </div>
+      <div class="card">
+        <div class="label">Latest Lead</div>
+        <div class="value" id="latest-lead">—</div>
+        <div class="muted" id="latest-time">No submissions yet</div>
+      </div>
+      <div class="card click-card" id="open-leads-card">
+        <div class="label">Leads Box</div>
+        <div class="value" style="font-size:18px">Click to view all leads</div>
+        <div class="muted">Open the full list and select a lead to see progress</div>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">All Leads</div>
+            <div class="muted">Click any row to open the lead and view its progress bar</div>
+          </div>
+          <div class="muted" id="result-count">0 results</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Created</th>
+                <th>Practice</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Stage</th>
+                <th>Progress</th>
+                <th>Source</th>
+              </tr>
+            </thead>
+            <tbody id="leads-body"></tbody>
+          </table>
+          <div id="empty" class="empty" style="display:none;">No leads yet.</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title">Lead Detail</div>
+            <div class="muted">Operator view with stage tracker</div>
+          </div>
+        </div>
+        <div class="detail" id="lead-detail">
+          <div class="empty" style="padding:0;">Select a lead to view status, notes, and progress.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STAGES = ['new', 'contacted', 'replied', 'qualified', 'signed-up', 'buyer'];
+    const LOST_STAGE = 'lost';
+
+    const leadsBody = document.getElementById('leads-body');
+    const emptyEl = document.getElementById('empty');
+    const totalLeadsEl = document.getElementById('total-leads');
+    const todayLeadsEl = document.getElementById('today-leads');
+    const latestLeadEl = document.getElementById('latest-lead');
+    const latestTimeEl = document.getElementById('latest-time');
+    const resultCountEl = document.getElementById('result-count');
+    const searchEl = document.getElementById('search');
+    const refreshBtn = document.getElementById('refresh');
+    const leadDetailEl = document.getElementById('lead-detail');
+    const openLeadsCard = document.getElementById('open-leads-card');
+
+    let allLeads = [];
+    let selectedLeadKey = null;
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '—';
+      const date = new Date(iso);
+      if (Number.isNaN(date.getTime())) return iso;
+      return date.toLocaleString([], {
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: 'numeric', minute: '2-digit'
+      });
+    }
+
+    function isToday(iso) {
+      const d = new Date(iso);
+      const now = new Date();
+      return d.getFullYear() === now.getFullYear()
+        && d.getMonth() === now.getMonth()
+        && d.getDate() === now.getDate();
+    }
+
+    function leadKey(lead) {
+      return [lead.created_at, lead.email, lead.practice].filter(Boolean).join('|');
+    }
+
+    function stageLabel(stage) {
+      return String(stage || 'new')
+        .replace('-', ' ')
+        .replace(/\b\w/g, s => s.toUpperCase());
+    }
+
+    function getStoredMeta(key) {
+      try {
+        return JSON.parse(localStorage.getItem(`scheduleiq-lead-meta:${key}`) || '{}');
+      } catch {
+        return {};
+      }
+    }
+
+    function saveStoredMeta(key, data) {
+      localStorage.setItem(`scheduleiq-lead-meta:${key}`, JSON.stringify(data));
+    }
+
+    function getLeadMeta(lead) {
+      const key = leadKey(lead);
+      return {
+        stage: 'new',
+        notes: '',
+        nextAction: '',
+        nextFollowUp: '',
+        ...getStoredMeta(key)
+      };
+    }
+
+    function getProgressPercent(stage) {
+      if (stage === LOST_STAGE) return 100;
+      const idx = STAGES.indexOf(stage);
+      const safeIdx = idx === -1 ? 0 : idx;
+      return ((safeIdx + 1) / STAGES.length) * 100;
+    }
+
+    function stageClass(stage) {
+      return `stage-${stage || 'new'}`;
+    }
+
+    function renderStats(leads) {
+      totalLeadsEl.textContent = leads.length;
+      todayLeadsEl.textContent = leads.filter(lead => isToday(lead.created_at)).length;
+
+      const latest = leads[0];
+      if (latest) {
+        latestLeadEl.textContent = latest.practice || '—';
+        latestTimeEl.textContent = formatDate(latest.created_at);
+      } else {
+        latestLeadEl.textContent = '—';
+        latestTimeEl.textContent = 'No submissions yet';
+      }
+    }
+
+    function renderTable(leads) {
+      const query = searchEl.value.trim().toLowerCase();
+      const filtered = leads.filter(lead => {
+        if (!query) return true;
+        return [lead.practice, lead.email, lead.phone, lead.source, lead.ip]
+          .filter(Boolean)
+          .some(v => String(v).toLowerCase().includes(query));
+      });
+
+      resultCountEl.textContent = `${filtered.length} result${filtered.length === 1 ? '' : 's'}`;
+
+      if (!filtered.length) {
+        leadsBody.innerHTML = '';
+        emptyEl.style.display = 'block';
+        emptyEl.textContent = allLeads.length ? 'No leads match that search.' : 'No leads yet.';
+        return;
+      }
+
+      emptyEl.style.display = 'none';
+      leadsBody.innerHTML = filtered.map(lead => {
+        const key = leadKey(lead);
+        const meta = getLeadMeta(lead);
+        const progress = Math.round(getProgressPercent(meta.stage));
+        const isSelected = selectedLeadKey === key;
+        return `
+          <tr class="lead-row ${isSelected ? 'selected' : ''}" data-key="${escapeHtml(key)}">
+            <td>${escapeHtml(formatDate(lead.created_at))}</td>
+            <td><strong>${escapeHtml(lead.practice || '—')}</strong></td>
+            <td>${lead.email ? `<a href="mailto:${escapeHtml(lead.email)}">${escapeHtml(lead.email)}</a>` : '—'}</td>
+            <td>${lead.phone ? `<a href="tel:${escapeHtml(lead.phone)}">${escapeHtml(lead.phone)}</a>` : '—'}</td>
+            <td><span class="pill stage-pill ${stageClass(meta.stage)}">${escapeHtml(stageLabel(meta.stage))}</span></td>
+            <td>${progress}%</td>
+            <td><span class="pill">${escapeHtml(lead.source || 'unknown')}</span></td>
+          </tr>
+        `;
+      }).join('');
+
+      document.querySelectorAll('.lead-row').forEach(row => {
+        row.addEventListener('click', () => {
+          selectedLeadKey = row.dataset.key;
+          renderTable(allLeads);
+          renderLeadDetail();
+        });
+      });
+    }
+
+    function renderLeadDetail() {
+      const lead = allLeads.find(item => leadKey(item) === selectedLeadKey);
+      if (!lead) {
+        leadDetailEl.innerHTML = '<div class="empty" style="padding:0;">Select a lead to view status, notes, and progress.</div>';
+        return;
+      }
+
+      const key = leadKey(lead);
+      const meta = getLeadMeta(lead);
+      const progress = Math.round(getProgressPercent(meta.stage));
+      const activeIndex = STAGES.indexOf(meta.stage);
+
+      leadDetailEl.innerHTML = `
+        <h2>${escapeHtml(lead.practice || 'Unnamed Lead')}</h2>
+        <div class="muted">Captured ${escapeHtml(formatDate(lead.created_at))}</div>
+
+        <div class="progress-wrap detail-section">
+          <div style="display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap;">
+            <div>
+              <div class="field-label">Current Stage</div>
+              <span class="pill stage-pill ${stageClass(meta.stage)}">${escapeHtml(stageLabel(meta.stage))}</span>
+            </div>
+            <div class="muted">Progress: ${progress}%</div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${progress}%"></div></div>
+          <div class="stage-row">
+            ${STAGES.map((stage, index) => `
+              <div class="mini-stage ${meta.stage === stage ? 'active' : index < activeIndex ? 'done' : ''}">${escapeHtml(stageLabel(stage))}</div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="detail-grid detail-section">
+          <div class="field">
+            <div class="field-label">Email</div>
+            <div class="field-value">${lead.email ? `<a href="mailto:${escapeHtml(lead.email)}">${escapeHtml(lead.email)}</a>` : '—'}</div>
+          </div>
+          <div class="field">
+            <div class="field-label">Phone</div>
+            <div class="field-value">${lead.phone ? `<a href="tel:${escapeHtml(lead.phone)}">${escapeHtml(lead.phone)}</a>` : '—'}</div>
+          </div>
+          <div class="field">
+            <div class="field-label">Source</div>
+            <div class="field-value">${escapeHtml(lead.source || '—')}</div>
+          </div>
+          <div class="field">
+            <div class="field-label">System Key</div>
+            <div class="field-value"><code>${escapeHtml(key)}</code></div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="field-label">Update Lead Progress</div>
+          <div class="form-row">
+            <select id="lead-stage">
+              ${[...STAGES, LOST_STAGE].map(stage => `
+                <option value="${escapeHtml(stage)}" ${meta.stage === stage ? 'selected' : ''}>${escapeHtml(stageLabel(stage))}</option>
+              `).join('')}
+            </select>
+            <input id="lead-followup" type="date" value="${escapeHtml(meta.nextFollowUp || '')}">
+          </div>
+          <div class="form-row">
+            <input id="lead-next-action" type="text" placeholder="Next action" value="${escapeHtml(meta.nextAction || '')}">
+            <button class="secondary" id="save-lead">Save Lead Update</button>
+          </div>
+          <div style="margin-top:12px;">
+            <textarea id="lead-notes" placeholder="Operator notes, contact attempts, context...">${escapeHtml(meta.notes || '')}</textarea>
+          </div>
+          <div class="detail-actions">
+            ${lead.email ? `<a class="btn" href="mailto:${escapeHtml(lead.email)}">Email lead</a>` : ''}
+            ${lead.phone ? `<a class="btn secondary" href="tel:${escapeHtml(lead.phone)}">Call lead</a>` : ''}
+          </div>
+          <div class="hint">Ops HQ Dash note: stage and note updates save locally in this browser for now.</div>
+        </div>
+      `;
+
+      const saveBtn = document.getElementById('save-lead');
+      saveBtn.addEventListener('click', () => {
+        const nextMeta = {
+          stage: document.getElementById('lead-stage').value,
+          nextFollowUp: document.getElementById('lead-followup').value,
+          nextAction: document.getElementById('lead-next-action').value.trim(),
+          notes: document.getElementById('lead-notes').value.trim()
+        };
+        saveStoredMeta(key, nextMeta);
+        renderTable(allLeads);
+        renderLeadDetail();
+      });
+    }
+
+    async function loadLeads() {
+      refreshBtn.disabled = true;
+      refreshBtn.textContent = 'Refreshing...';
+      try {
+        const response = await fetch('/api/pilot/leads');
+        const data = await response.json();
+        allLeads = Array.isArray(data)
+          ? [...data].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+          : [];
+
+        if (!selectedLeadKey && allLeads.length) {
+          selectedLeadKey = leadKey(allLeads[0]);
+        }
+        if (selectedLeadKey && !allLeads.some(lead => leadKey(lead) === selectedLeadKey)) {
+          selectedLeadKey = allLeads[0] ? leadKey(allLeads[0]) : null;
+        }
+
+        renderStats(allLeads);
+        renderTable(allLeads);
+        renderLeadDetail();
+      } catch (error) {
+        allLeads = [];
+        renderStats([]);
+        leadsBody.innerHTML = '';
+        leadDetailEl.innerHTML = '<div class="empty" style="padding:0;">Failed to load lead detail.</div>';
+        emptyEl.style.display = 'block';
+        emptyEl.textContent = 'Failed to load leads.';
+      } finally {
+        refreshBtn.disabled = false;
+        refreshBtn.textContent = 'Refresh';
+      }
+    }
+
+    searchEl.addEventListener('input', () => renderTable(allLeads));
+    refreshBtn.addEventListener('click', loadLeads);
+    openLeadsCard.addEventListener('click', () => {
+      document.querySelector('.panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    loadLeads();
+    setInterval(loadLeads, 30000);
+  </script>
+</body>
+</html>
